@@ -1,11 +1,10 @@
 $$include '../../meta/macros.ptl'
 
 import [Arcs Quadify ShapeConv] from "typo-geom"
-import [OffsetCurve BezToContoursSink GEOMETRY_PRECISION] from '../../support/geometry/curve-util'
-import [mix linreg clamp fallback] from '../../support/utils'
-import [DesignParameters] from '../../meta/aesthetics'
-import [TieMark TieGlyph] from "../../support/gr"
-import [Box] from '../../support/geometry/box'
+import [mix linreg clamp fallback] from"../../support/utils.mjs"
+import [DesignParameters] from"../../meta/aesthetics.mjs"
+import [TieMark TieGlyph] from"../../support/gr.mjs"
+import [Box] from"../../support/geometry/box.mjs"
 
 glyph-module
 
@@ -13,7 +12,7 @@ glyph-block Mark-Horn-And-Angle : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	glyph-block-import Mark-Shared-Metrics : markExtend markHalfStroke markStress markFine
+	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
 	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
 	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
 	glyph-block-import Mark-Above : commaAboveRadius
@@ -55,53 +54,72 @@ glyph-block Mark-Horn-And-Angle : begin
 					widths.rhs [mix hornFine hornStroke t]
 				g4 (attX - overshootX - HalfStroke * HVContrast) (attY - overshootY - Stroke) [widths.rhs hornStroke]
 
-	create-glyph 'horn' 0x31B : glyph-proc
+	define [SquareHornShape attX attY overshootX overshootY yrP] : glyph-proc
+		local [object [radius r] hornFine hornStroke startX startY] : HornDim attX attY overshootX overshootY yrP
+		local radius : r * DesignParameters.squareDotScalar
+		include : union
+			SquareAt (startX - radius) startY radius
+			dispiro
+				flat startX (startY + radius) [widths.rhs.heading hornFine Downward]
+				curl startX (startY - radius)
+				quadControls 0 0.8 8 : object : blend : lambda [t]
+					widths.rhs [mix hornFine hornStroke t]
+				g4 (attX - overshootX - HalfStroke * HVContrast) (attY - overshootY - Stroke) [widths.rhs hornStroke]
+
+	create-glyph 'horn.round' : glyph-proc
 		set-width 0
 		include : HornShape 0 XH 0 0 0.5
 		include : HornMarkAnchor 0 XH 0 0 0.5
 
-	create-glyph 'longHorn' : glyph-proc
+	create-glyph 'horn.square' : glyph-proc
 		set-width 0
-		include : HornShape 0 XH (Width / 2) (SmoothB) 0.5
-		include : HornMarkAnchor 0 XH (Width / 2) (SmoothB) 0.5
+		include : SquareHornShape 0 XH 0 0 0.5
+		include : HornMarkAnchor 0 XH 0 0 0.5
+
+	select-variant 'horn' 0x31B (follow -- 'diacriticDot')
+
+
+	create-glyph 'longHorn.round' : glyph-proc
+		set-width 0
+		include : HornShape 0 XH (Width / 2) (ArchDepthB) 0.5
+		include : HornMarkAnchor 0 XH (Width / 2) (ArchDepthB) 0.5
+
+	create-glyph 'longHorn.square' : glyph-proc
+		set-width 0
+		include : SquareHornShape 0 XH (Width / 2) (ArchDepthB) 0.5
+		include : HornMarkAnchor 0 XH (Width / 2) (ArchDepthB) 0.5
+
+	select-variant 'longHorn' null (follow -- 'diacriticDot')
 
 	create-glyph 'leftangleTR' 0x31A : glyph-proc
 		set-width 0
-		include : VBarLeft 0 aboveMarkBot aboveMarkTop (markFine * 2)
-		include : HBarTop (-markExtend * 1.5) 0 aboveMarkTop (markFine * 2)
+		include : VBar.l 0 aboveMarkBot aboveMarkTop (markFine * 2)
+		include : HBar.t (-markExtend * 1.5) 0 aboveMarkTop (markFine * 2)
 		set-mark-anchor 'topright' 0 XH 0 aboveMarkTop
 
-	create-glyph 'dotTR' 0x358 : glyph-proc
-		set-width 0
-		include : refer-glyph "dotAbove"
-		include : ApparentTranslate (RightSB - Middle + DotRadius) 0
-		set-mark-anchor 'topright' 0 XH 0 aboveMarkTop
+	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
+		create-glyph "dotTR.\(suffix)" 0x358 : glyph-proc
+			set-width 0
+			include : HornMarkAnchor 0 XH 0 0 0.5
+			local [object radius startX startY] : HornDim 0 XH 0 0 0.5
+			local r : mix radius DotRadius 0.5
+			include : DrawAt (startX - r) startY (r * kdr)
 
-	create-glyph 'commaTR' 0x315 : glyph-proc
+	select-variant "dotTR" 0x358 (follow -- "diacriticDot")
+
+	derive-glyphs 'commaTR' 0x315 'commaAbove' : function [src gr] : glyph-proc
 		set-width 0
-		include : refer-glyph "commaAbove"
+		include : refer-glyph src
 		include : ApparentTranslate (RightSB - Middle + DotRadius) 0
 		set-mark-anchor 'topright' 0 XH 0 aboveMarkTop
 
 	create-glyph 'rtailBR' 0x322 : glyph-proc
 		set-width 0
-
 		set-mark-anchor 'bottomright' 0 0 0 belowMarkBot
 		include : dispiro
 			widths.rhs
 			flat 0 (-O) [heading Downward]
 			curl 0 0 [heading Downward]
-			straight.right.end (HookX - HalfStroke * HVContrast) (-Hook + HalfStroke)
-
-	create-glyph 'rRetroflexTailBR' : glyph-proc
-		set-width 0
-
-		set-mark-anchor 'bottomright' 0 0 0 belowMarkBot
-		include : HBarBottom (-Stroke * HVContrast) (SideJut - HalfStroke * HVContrast) 0
-		include : dispiro
-			widths.rhs
-			flat (SideJut) Stroke [heading Downward]
-			curl (SideJut) 0 [heading Downward]
 			straight.right.end (HookX - HalfStroke * HVContrast) (-Hook + HalfStroke)
 
 	create-glyph 'ltailBR' 0x321 : glyph-proc
@@ -120,9 +138,32 @@ glyph-block Mark-Horn-And-Angle : begin
 		include : refer-glyph "leftHalfCircleBelow"
 		include : FlipAround markMiddle (XH / 2)
 
-	create-glyph 'ogonekTR' : glyph-proc
-		set-width 0
-		include : refer-glyph "ogonekBelow"
-		local ogonekBot : [mix belowMarkTop belowMarkBot 0.75] + markStress
-		local ogonekRight : markMiddle + markExtend * 0.85
-		set-mark-anchor 'trailing' markMiddle 0 ogonekRight ogonekBot
+	define ogonekTrConfig : object
+		'ogonekTR'   { (7/16) (1/8) 1 }
+		'ogonekTR_Y' { (3/16) 1     6 }
+
+	foreach { glyphName { pExtL pExtR cwMidStrokeWidth } } [Object.entries ogonekTrConfig] : do
+		create-glyph glyphName : glyph-proc
+			set-width 0
+
+			local fine : AdviceStroke 8
+			local depth : 0 - Descender - markStroke
+			local extL : pExtL * depth + 0.125 * markStress
+			local extR : Math.max (pExtR * markExtend) (1.5 * TanSlope * markStroke)
+
+			local turnSlope : 0.5 * ((markStroke - fine) / markStroke - (ArchDepthB - ArchDepth) / ArchDepth)
+			local swMid : Math.min markStroke [AdviceStroke cwMidStrokeWidth]
+
+			include : difference
+				dispiro
+					g4 markMiddle 0 [widths.rhs.heading fine Leftward]
+					alsoThru 0.5 (0.375 - 0.2 * markStroke / depth) [widths.rhs : mix fine swMid 0.25]
+					g4.down.mid (markMiddle - extL) (-0.75 * depth) [widths.rhs.heading swMid {.x HVContrast .y turnSlope}]
+					arcvh
+					g4 (markMiddle + [mix (-extL) extR (11/16)]) (-depth + O) [widths.rhs.heading markStroke Rightward]
+					g4 (markMiddle + extR) (-depth + 0.5 * O) [heading Rightward]
+				intersection
+					MaskAbove 0
+					MaskRight markMiddle
+
+			set-mark-anchor 'trailing' markMiddle 0 (markMiddle + extR) (-depth - 0.5 * O - markStroke)

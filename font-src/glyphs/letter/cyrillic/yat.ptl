@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
 
 glyph-module
 
@@ -8,6 +8,7 @@ glyph-block Letter-Cyrillic-Yat : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
 	glyph-block-import Letter-Cyrillic-Yeri : CyrlYeriUprightShape
 
 	create-glyph 'cyrl/Yat' 0x462 : glyph-proc
@@ -15,18 +16,24 @@ glyph-block Letter-Cyrillic-Yat : begin
 		local pBar 0.5
 		include : CyrlYeriUprightShape CAP (pBar -- pBar)
 		local cTop : if SLAB (CAP - Stroke / 2) CAP
-		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix (CAP * pBar) cTop 0.5]
+		include : LetterBarOverlay.l.in
+			x -- SB
+			bot -- (CAP * pBar + HalfStroke)
+			top -- (CAP - [if SLAB Stroke 0])
 
 	create-glyph 'cyrl/yat.upright' : glyph-proc
 		include : MarkSet.b
 		local pBar 0.4
-		include : CyrlYeriUprightShape CAP (pBar -- pBar)
-		local cTop : if SLAB (CAP - Stroke / 2) CAP
-		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix (CAP * pBar) cTop 0.5]
+		include : CyrlYeriUprightShape Ascender (pBar -- pBar)
+		local cTop : if SLAB (Ascender - Stroke / 2) Ascender
+		include : LetterBarOverlay.l.in
+			x -- SB
+			bot -- (Ascender * pBar + HalfStroke)
+			top -- (Ascender - [if SLAB Stroke 0])
 
 		if SLAB : begin
 			eject-contour 'serifYeriLT'
-			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+			include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
 
 	glyph-block-import Letter-Shared-Shapes : nShoulderKnots
 
@@ -40,7 +47,7 @@ glyph-block Letter-Cyrillic-Yat : begin
 
 		set-width df.width
 		include : df.markSet.e
-		include : VBarLeft df.leftSB 0 XH df.mvs
+		include : VBar.l df.leftSB 0 XH df.mvs
 		include : dispiro
 			nShoulderKnots
 				left   -- (df.leftSB + df.mvs * HVContrast)
@@ -59,5 +66,5 @@ glyph-block Letter-Cyrillic-Yat : begin
 
 		if SLAB : begin
 			if [not para.isItalic] : include : tagged 'serifLB'
-				LeftwardBottomSerif df.leftSB 0  SideJut
-			include : tagged 'serifLT' : LeftwardTopSerif    df.leftSB XH SideJut
+				HSerif.lb df.leftSB 0  SideJut
+			include : tagged 'serifLT' : HSerif.lt    df.leftSB XH SideJut

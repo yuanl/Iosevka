@@ -1,10 +1,10 @@
 ###### Automatic builds
 $$include '../../meta/macros.ptl'
 
-import [linreg clamp mix fallback] from '../../support/utils'
-import [getGrTree getGrMesh] from "../../support/gr"
-import [AnyCv DotlessOrNot CvDecompose MathSansSerif] from "../../support/gr"
-import [NumeratorForm DenominatorForm] from "../../support/gr"
+import [linreg clamp mix fallback] from"../../support/utils.mjs"
+import [getGrTree getGrMesh] from"../../support/gr.mjs"
+import [AnyCv DotlessOrNot CvDecompose MathSansSerif] from"../../support/gr.mjs"
+import [NumeratorForm DenominatorForm] from"../../support/gr.mjs"
 extern Map
 extern Set
 
@@ -44,7 +44,7 @@ glyph-block Autobuild-Transformed-Shared : begin
 			local dstName : wrapName groupID srcName
 			suggestMappedName targetNameMap srcName dstName
 
-			local tree : getGrTree srcName {DotlessOrNot AnyCv} query-glyph
+			local tree : getGrTree srcName { DotlessOrNot AnyCv } query-glyph
 			foreach [{gr origSrcName relSrcName} : items-of tree] : if [query-glyph relSrcName] : begin
 				local origDstName : suggestMappedName targetNameMap origSrcName [wrapName groupID origSrcName]
 				local relDstName  : suggestMappedName targetNameMap relSrcName  [wrapName groupID relSrcName]
@@ -92,11 +92,11 @@ glyph-block Autobuild-Transformed : begin
 						throw : new Error "Cannot find glyph \(glyphid)"
 					local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
 					include [miniatureFont.queryByName glyphid] AS_BASE ALSO_METRICS
-					include [Upright] true
+					include [Ungizmo] true
 					include [Translate (-middle) (-CAP)] true
 					include [Scale 0.7] true
 					include [Translate middle (CAP + AccentStackOffset / 2)] true
-					include [Italify] true
+					include [Regizmo] true
 				if ([not fRelated] && gr) : gr.set [query-glyph glyphid] (targetNameMap.(glyphid))
 		link-relations relSets
 		return { targetNameMap records }
@@ -114,11 +114,11 @@ glyph-block Autobuild-Transformed : begin
 				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
 					local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
 					include [miniatureFont.queryByName glyphid] AS_BASE ALSO_METRICS
-					include [Upright] true
+					include [Ungizmo] true
 					include [Translate (-middle) 0] true
 					include [Scale 0.7] true
 					include [Translate middle (Descender / 2)] true
-					include [Italify] true
+					include [Regizmo] true
 				if ([not fRelated] && gr) : gr.set [query-glyph glyphid] (targetNameMap.(glyphid))
 		link-relations relSets
 
@@ -129,7 +129,7 @@ glyph-block Autobuild-Transformed : begin
 		local forkedParams : Object.create para
 		set forkedParams.cap0 para.cap
 		set forkedParams.cap XH
-		set forkedParams.xheight (XH * XH / CAP)
+		set forkedParams.xHeight (XH * XH / CAP)
 		set forkedParams.diversityM 1
 		set forkedParams.diversityF 1
 		set forkedParams.diversityI 1
@@ -162,11 +162,11 @@ glyph-block Autobuild-Transformed : begin
 
 				local middle : derived.advanceWidth / 2
 				include derived
-				include : Upright
+				include : Ungizmo
 				include : Translate (-middle) (-low)
 				include : Scale 0.4
 				include : Translate markMiddle aboveMarkBot
-				include : Italify
+				include : Regizmo
 				local markHeight : 0.4 * (high - low) + 0 * (aboveMarkTop - aboveMarkBot)
 				set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkBot + markHeight)
 				set-base-anchor 'aboveBrace' markMiddle (aboveMarkBot + markHeight + XH * 0.2)
@@ -186,11 +186,11 @@ glyph-block Autobuild-Transformed : begin
 				set-width 0
 				local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
 				include [miniatureFont.queryByName glyphid]
-				include : Upright
+				include : Ungizmo
 				include : Translate (-middle) (-XH)
 				include : Scale 0.4
 				include : Translate markMiddle belowMarkTop
-				include : Italify
+				include : Regizmo
 				set-mark-anchor 'below' markMiddle 0 markMiddle belowMarkBot
 				set-base-anchor 'belowBrace' markMiddle (belowMarkTop - XH * 0.2)
 
@@ -218,13 +218,13 @@ glyph-block Autobuild-Transformed : begin
 		list 0x02B6 'invSmcpR'
 		list 0x02B7 'w'
 		list 0x02B8 'y'
-		list 0x02C0 'fineglottalstop'
-		list 0x02C1 'finerevglottalstop'
-		list 0x02E0 'latingamma'
+		list 0x02C0 'fineGlottalStop'
+		list 0x02C1 'fineRevGlottalStop'
+		list 0x02E0 'latn/gamma'
 		list 0x02E1 'l'
 		list 0x02E2 's'
 		list 0x02E3 'x'
-		list 0x02E4 'revglottalstop'
+		list 0x02E4 'revGlottalStop'
 		list 0x2071 'i'
 		list 0x207F 'n'
 		list 0x1D43 'a'
@@ -235,7 +235,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D48 'd'
 		list 0x1D49 'e'
 		list 0x1D4A 'turne'
-		list 0x1D4B 'grek/epsilon'
+		list 0x1D4B 'latn/epsilon'
 		list 0x1D4C 'turnepsilon'
 		list 0x1D4D 'g'
 		list 0x1D4E 'turni'
@@ -249,6 +249,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D56 'p'
 		list 0x1D57 't'
 		list 0x1D58 'u'
+		list 0x1D59 'uSideways'
 		list 0x1D5A 'turnm'
 		list 0x1D5B 'v'
 		list 0x1D5C 'latinAyin'
@@ -262,9 +263,9 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D9C 'c'
 		list 0x1D9D 'cCurlyTail'
 		list 0x1D9E 'eth'
-		list 0x1D9F 'latn/revSmallEpsilon'
+		list 0x1D9F 'latn/epsilonRev'
 		list 0x1DA0 'f'
-		list 0x1DA1 'turnf'
+		list 0x1DA1 'dotlessjBar'
 		list 0x1DA2 'gScript'
 		list 0x1DA3 'turnh'
 		list 0x1DA4 'iBarOver'
@@ -274,6 +275,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DA8 'jCurlyTail'
 		list 0x1DAB 'smcpL'
 		list 0x1DA9 'lRTail'
+		list 0x1DAA 'lPalatalHook'
 		list 0x1DAC 'mLTail'
 		list 0x1DAD 'turnmLeg'
 		list 0x1DAE 'nltail'
@@ -313,8 +315,6 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D3D 'OU'
 		list 0x1D3E 'P'
 		list 0x1D3F 'R'
-		list null   'C' # there is no superscript C in unicode, but is is used for the MC symbol
-		list null   'S' # there is no superscript S in unicode, but is is used for the SM symbol
 		list 0x1D40 'T'
 		list 0x1D41 'U'
 		list 0x1D42 'W'
@@ -324,8 +324,67 @@ glyph-block Autobuild-Transformed : begin
 		list 0x207C 'equal'
 		list 0x207D 'parenLeft'
 		list 0x207E 'parenRight'
-		list 0xA7F8 'smcpHbar'
+		list 0xA702 'subst'
+		list 0xA703 'substBarNoRise'
+		list 0xA704 'supst'
+		list 0xA705 'supstBarNoRise'
+		list 0xA71B 'arrowUp.NWID'
+		list 0xA71C 'arrowDown.NWID'
+		list 0xA71D 'alveolarclick'
+		list 0xA71E 'exclamDownAlt'
+		list 0xA7F2 'C'
+		list 0xA7F3 'F'
+		list 0xA7F4 'Q'
+		list 0xA7F8 'smcpHStroke'
 		list 0xA7F9 'oe'
+		list 0xAB5C 'heng'
+		list 0xAB5E 'lTildeOver'
+		list 0xAB69 'turnw'
+		list 0x107AF 'tRTail'
+		list 0x1078B 'dHookBottom'
+		list 0x107A5 'q'
+		list 0x10792 'smcpG'
+		list 0x107B3 'glottalStopBar'
+		list 0x10795 'hBar'
+		list 0x10797 'hHookTopLTail'
+		list 0x107B0 'vHookTop'
+		list 0x107A9 'rFlap'
+		list 0x107A8 'rRTail'
+		list 0x10784 'smcpB'
+		list 0x107AA 'smcpR'
+		list 0x10796 'smcpH'
+		list 0x107B4 'revGlottalStopBar'
+		list 0x1079B 'lBelt'
+		list 0x1079E 'lyogh'
+		list 0x1079D 'lBeltRTail'
+		list 0x1079F 'lyoghRTail'
+		list 0x107A1 'turnyBelt'
+		list 0x1079C 'smcpLBelt'
+		list 0x107A0 'turny'
+		list 0x107A6 'turnrlongleg'
+		list 0x107A7 'rTurnLongLetRTail'
+		list 0x10785 'bHookTop'
+		list 0x1078C 'dHookTop'
+		list 0x1078D 'dHookTopBottom'
+		list 0x10798 'dotlessjBarHookTop'
+		list 0x10793 'gScriptHookTop'
+		list 0x10794 'smcpGHookTop'
+		list 0x107B5 'bullEye'
+		list 0x107B6 'dentalclick'
+		list 0x107B8 'palatoalveolarclick'
+		list 0x107B9 'retroflexClickHook'
+		list 0x107B7 'alveolarlateralclick'
+		list 0x107B2 'smcpY'
+		list 0x107A4 'closeomega'
+		list 0x107A2 'oSlash'
+		list 0x1078E 'eRev'
+		list 0x10791 'ramshorn'
+		list 0x1078F 'closeturnepsilon'
+		list 0x10783 'ae'
+		list 0x107A3 'smcpOE'
+		list 0x10781 'triangleColon'
+		list 0x10782 'halfTriangleColon'
+		list null   'S' # there is no superscript S in unicode, but is is used for the SM symbol
 
 	createSuperscripts 'numerator' NumeratorForm : list
 		list null 'zero.onum'
@@ -396,6 +455,11 @@ glyph-block Autobuild-Transformed : begin
 		list 0x208C 'equal'
 		list 0x208D 'parenLeft'
 		list 0x208E 'parenRight'
+		list 0xA700 'subst'
+		list 0xA701 'substBarNoRise'
+		list 0xA706 'supst'
+		list 0xA707 'supstBarNoRise'
+		list 0xA71F 'exclamDownAlt'
 
 	createSubscripts 'denominator' DenominatorForm : list
 		list null 'zero.onum'
@@ -489,7 +553,7 @@ glyph-block Autobuild-Transformed : begin
 	createMedievalCombs Descender XH : list
 		list 0x1DDA 'g'
 		list 0x1DD7 'cCedilla'
-		list 0x1DE9 'grek/beta'
+		list 0x1DE9 'latn/beta'
 		list 0x1DEE 'p'
 		list 0x2DEC 'cyrl/er'
 
@@ -499,7 +563,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DEF 'esh'
 
 	createMedievalBelowCombs : list
-		list 0x0359 'asterisk.midXH'
+		list 0x0359 'asterisk/sMid'
 		list 0x1ABF 'w'
 		list 0x1AC0 'turnw'
 		list 0x1DCA 'r'
@@ -551,7 +615,6 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 	define ObliqueBlackboardBolds : Array.from '𝔻𝕕𝕖𝕚𝕛'
 
 	define [CreateMathDerivatives groupName tfm gr base letters overrides] : begin
-		if recursive : return nothing
 		local jobs {}
 		local overrideMap : new Map (overrides || {})
 		foreach j [range 0 letters.length] : begin
@@ -564,7 +627,6 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 		createMathDerivedSeriesImpl groupName tfm jobs
 
 	define [CreateMathAliasableImpl groupName altGroupName tfm gr base letters overrides] : begin
-		if recursive : return nothing
 		local overrideMap : new Map (overrides || {})
 		foreach j [range 0 letters.length] : begin
 			local letter letters.(j)
@@ -656,12 +718,13 @@ glyph-block Autobuild-Rhotic : begin
 		return { targetNameMap records }
 
 	createRhotics 'er' (XH / 2) : list { 0x25A 'schwa' }
-	createRhotics 'revLatinEpsilonEr' (XH * [mix 0.65 1 0.5]) : list { 0x25D 'latn/revSmallEpsilon' }
+	createRhotics 'revLatinEpsilonEr' (XH * [mix 0.65 1 0.5]) : list { 0x25D 'latn/epsilonRev' }
 
 glyph-block Autobuild-Rotated : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Miniature
+	glyph-block-import Symbol-Math-APL : LinkAplFormForNwidWwid
 
 	for-width-kinds WideWidth1 : do
 		local s : (RightSB - SB - O * 4 + (MosaicWidth - Width) * 0.5) / CAP
@@ -683,3 +746,7 @@ glyph-block Autobuild-Rotated : begin
 		InftyLikeShape 'propto'   0x221D 'rotetedPropto'
 		InftyLikeShape 'infty'    0x221E 'eight.lnum.crossing'
 		InftyLikeShape 'invLazyS' 0x223E 'revS.serifless'
+
+	# Link APLF for BQN
+	LinkAplFormForNwidWwid 'infty'
+	LinkAplFormForNwidWwid 'invLazyS'

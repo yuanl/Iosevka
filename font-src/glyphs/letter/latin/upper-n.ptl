@@ -1,7 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -9,7 +9,7 @@ glyph-block Letter-Latin-Upper-N : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Shared-Metrics : markHalfStroke
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : SerifFrame VerticalHook
 
 
 	define BODY-SYMMETRIC  1
@@ -31,13 +31,13 @@ glyph-block Letter-Latin-Upper-N : begin
 					flat left 0 [widths.heading 0 stroke Upward]
 					curl left (top * 0.4) [heading Upward]
 					straight.up.end left top [widths.heading 0 swDiag Upward]
-				[Just BODY-ASYMMETRIC] : VBarLeft left 0 top stroke
+				[Just BODY-ASYMMETRIC] : VBar.l left 0 top stroke
 			match bodyType
 				[Just BODY-SYMMETRIC] : dispiro
 					flat right top [widths.heading 0 stroke Downward]
 					curl right (top * 0.6) [heading Downward]
 					straight.down.end right 0 [widths.heading 0 swDiag Downward]
-				[Just BODY-ASYMMETRIC] : VBarRight right 0 top stroke
+				[Just BODY-ASYMMETRIC] : VBar.r right 0 top stroke
 			intersection [Rect top 0 left right]
 				ExtLineCenter 2 swDiag (left + swDiag) top (right - swDiag) yEnd
 
@@ -58,10 +58,15 @@ glyph-block Letter-Latin-Upper-N : begin
 			include : NShape bodyType slabType CAP SB RightSB (crDiag -- crD)
 			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
+		create-glyph "Eng.\(suffix)" : glyph-proc
+			include : MarkSet.capDesc
+			include : NShape bodyType slabType CAP SB RightSB (crDiag -- crD)
+			include : VerticalHook.r RightSB 0 (-HookX) Hook
+
 		create-glyph "Nltail.\(suffix)" : glyph-proc
 			include [refer-glyph "N.\(suffix)"] AS_BASE ALSO_METRICS
 			eject-contour 'serifLB'
-			include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-HookX) Hook
+			include : VerticalHook.l SB 0 (-HookX) Hook
 
 		create-glyph "smcpN.\(suffix)" : glyph-proc
 			include : MarkSet.e
@@ -76,15 +81,16 @@ glyph-block Letter-Latin-Upper-N : begin
 	alias 'grek/Nu' 0x39D 'N'
 	alias-reduced-variant 'grek/Nu/sansSerif' 'grek/Nu' 'N/sansSerif' MathSansSerif
 
-	select-variant 'smcpN' 0x274 (follow -- 'N')
+	select-variant 'Eng'    0x14A  (follow -- 'N')
+	select-variant 'smcpN'  0x274  (follow -- 'N')
 	select-variant 'Nltail' 0x19D  (follow -- 'N')
 	select-variant 'currency/nairaSignBase' (follow -- 'N')
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/N' 0x2115 : glyph-proc
 		include : MarkSet.capital
-		include : VBarLeft SB 0 CAP BBS
-		include : VBarRight RightSB 0 CAP BBS
+		include : VBar.l SB 0 CAP BBS
+		include : VBar.r RightSB 0 CAP BBS
 		include : intersection
 			Rect CAP 0 SB RightSB
 			union
@@ -151,5 +157,5 @@ glyph-block Letter-Latin-Inverse-Upper-N : begin
 
 	alias 'cyrl/smcpI' 0x1D0E 'cyrl/i.upright'
 
-	derive-composites 'cyrl/IShortTail' 0x48A 'cyrl/I' [refer-glyph 'breveAbove'] [CyrTailDescender RightSB]
-	derive-composites 'cyrl/iShortTail.upright' null  'cyrl/i.upright' [refer-glyph 'breveAbove'] [CyrTailDescender RightSB]
+	derive-composites 'cyrl/IShortTail' 0x48A 'cyrl/I' [refer-glyph 'breveAbove'] [CyrTailDescender.rSideJut RightSB 0]
+	derive-composites 'cyrl/iShortTail.upright' null  'cyrl/i.upright' [refer-glyph 'breveAbove'] [CyrTailDescender.rSideJut RightSB 0]

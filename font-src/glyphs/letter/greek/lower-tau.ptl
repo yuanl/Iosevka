@@ -1,7 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -13,7 +13,7 @@ glyph-block Letter-Greek-Lower-Tau : begin
 
 	create-glyph 'grek/tau' 0x3C4 : glyph-proc
 		include : MarkSet.e
-		include : HBarTop SB RightSB XH
+		include : HBar.t SB RightSB XH
 		local hd : FlatHookDepth [DivFrame 1]
 		include : dispiro
 			widths.center

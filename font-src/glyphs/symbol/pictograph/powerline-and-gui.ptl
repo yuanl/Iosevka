@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
 
 glyph-module
 
@@ -11,11 +11,11 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 	define uiFigTop : mix ParenBot ParenTop 0.95
 	define uiFigBot : mix ParenBot ParenTop 0.05
 
-	create-glyph 'branch' 0xE0A0 : glyph-proc
+	create-glyph 'powerline/branch' 0xE0A0 : glyph-proc
 		local fine : AdviceStroke 3.5
 		local y1 : mix uiFigBot uiFigTop 0.8
 		local y2 : mix uiFigBot uiFigTop 0.2
-		include : VBarLeft SB uiFigBot uiFigTop fine
+		include : VBar.l SB uiFigBot uiFigTop fine
 		include : dispiro
 			widths.rhs fine
 			flat RightSB y1
@@ -23,7 +23,7 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 			g4 (SB + fine * HVContrast) y2 [heading Leftward]
 		include : DotAt (RightSB - fine * HVContrast / 2) y1 [Math.max (fine * 1.5) PeriodRadius]
 
-	create-glyph 'pwlLock' 0xE0A2 : glyph-proc
+	create-glyph 'powerline/lock' 0xE0A2 : glyph-proc
 		local fine : AdviceStroke 3.5
 		local lockTop : mix uiFigBot uiFigTop 0.6
 		local lockLeft : SB / 2
@@ -41,7 +41,7 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 					corner Width (lockTop - 1)
 					corner 0 (lockTop - 1)
 					close
-				OShape uiFigTop uiFigBot SB RightSB fine (SmallSmoothA) (SmallSmoothB)
+				OShape uiFigTop uiFigBot SB RightSB fine (SmallArchDepthA) (SmallArchDepthB)
 			difference
 				spiro-outline
 					corner lockLeft lockTop
@@ -49,7 +49,50 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 					corner lockRight uiFigBot
 					corner lockLeft uiFigBot
 					close
-				OShapeOutline lockHoleTop lockHoleBottom lockHoleLeft lockHoleRight fine (SmallSmoothA * lockHoleWidth) (SmallSmoothB * lockHoleWidth)
+				OShapeOutline lockHoleTop lockHoleBottom lockHoleLeft lockHoleRight fine (SmallArchDepthA * lockHoleWidth) (SmallArchDepthB * lockHoleWidth)
+
+	do "Progress Bar"
+		define frameLeft  : mix SB RightSB DesignParameters.bracketOutside
+		define frameRight : mix RightSB SB DesignParameters.bracketOutside
+		define progressBarGap : Math.min ((TackTop - TackBot) / 6) (Width / 6) [AdviceStroke 5]
+
+		create-glyph 'powerline/progressBarStartEmpty' 0xEE00 : glyph-proc
+			include : VBar.l   frameLeft TackTop TackBot GeometryStroke
+			include : HBar.t    frameLeft (Width - O) TackTop GeometryStroke
+			include : HBar.b frameLeft (Width - O) TackBot GeometryStroke
+
+		create-glyph 'powerline/progressBarMiddleEmpty' 0xEE01 : glyph-proc
+			include : HBar.t    O (Width - O) TackTop GeometryStroke
+			include : HBar.b O (Width - O) TackBot GeometryStroke
+
+		create-glyph 'powerline/progressBarEndEmpty' 0xEE02 : glyph-proc
+			include : VBar.r  frameRight TackTop TackBot GeometryStroke
+			include : HBar.t    O frameRight TackTop GeometryStroke
+			include : HBar.b O frameRight TackBot GeometryStroke
+
+		create-glyph 'powerline/progressBarStartFilled' 0xEE03 : glyph-proc
+			include : refer-glyph 'powerline/progressBarStartEmpty' AS_BASE ALSO_METRICS
+			include : Rect
+				TackTop - GeometryStroke - progressBarGap
+				TackBot + GeometryStroke + progressBarGap
+				frameLeft + GeometryStroke * HVContrast + progressBarGap * HVContrast
+				Width - O
+
+		create-glyph 'powerline/progressBarMiddleFilled' 0xEE04 : glyph-proc
+			include : refer-glyph 'powerline/progressBarMiddleEmpty' AS_BASE ALSO_METRICS
+			include : Rect
+				TackTop - GeometryStroke - progressBarGap
+				TackBot + GeometryStroke + progressBarGap
+				0 + O
+				Width - O
+
+		create-glyph 'powerline/progressBarEndFilled' 0xEE05 : glyph-proc
+			include : refer-glyph 'powerline/progressBarEndEmpty' AS_BASE ALSO_METRICS
+			include : Rect
+				TackTop - GeometryStroke - progressBarGap
+				TackBot + GeometryStroke + progressBarGap
+				0 + O
+				frameRight - GeometryStroke * HVContrast - progressBarGap * HVContrast
 
 	for-width-kinds WideWidth4
 		do "arrowheadShapedPointer"
@@ -276,7 +319,7 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 
 			define [StickManBody kl kr] : glyph-proc
 				include : StickManHead
-				include : VBar scaffold.xMiddle scaffold.yPelvis scaffold.yNeck
+				include : VBar.m scaffold.xMiddle scaffold.yPelvis scaffold.yNeck
 				include : dispiro
 					widths.center scaffold.stroke
 					corner scaffold.xMiddle scaffold.yPelvis
@@ -294,7 +337,7 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 				define dressLeft : scaffold.xLeftFoot - scaffold.stroke / 2
 				define dressRight : scaffold.xRightFoot + scaffold.stroke / 2
 				include : StickManArms p kl kr
-				include : VBar scaffold.xMiddle [scaffold.yShoulder p] scaffold.yNeck
+				include : VBar.m scaffold.xMiddle [scaffold.yShoulder p] scaffold.yNeck
 				include : intersection
 					spiro-outline
 						corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
@@ -313,8 +356,8 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 							widths.rhs scaffold.stroke
 							corner dressLeft dressBottom
 							corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
-				include : VBar [mix dressLeft dressRight 0.3] scaffold.bot (dressBottom - O) scaffold.stroke
-				include : VBar [mix dressLeft dressRight 0.7] scaffold.bot (dressBottom - O) scaffold.stroke
+				include : VBar.m [mix dressLeft dressRight 0.3] scaffold.bot (dressBottom - O) scaffold.stroke
+				include : VBar.m [mix dressLeft dressRight 0.7] scaffold.bot (dressBottom - O) scaffold.stroke
 
 			# Stick Man Figure
 			create-glyph [MangleName 'stickMan'] [MangleUnicode 0x1FBC5] : glyph-proc
@@ -357,8 +400,8 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 					corner scaffold.xRight  (scaffold.bot + scaffold.stroke)
 					corner scaffold.xRight  (scaffold.top - scaffold.slopeRise)
 				union
-					VBarLeft scaffold.xLeft scaffold.bot scaffold.top scaffold.stroke
-					VBarRight scaffold.xRight scaffold.bot scaffold.top scaffold.stroke
+					VBar.l scaffold.xLeft scaffold.bot scaffold.top scaffold.stroke
+					VBar.r scaffold.xRight scaffold.bot scaffold.top scaffold.stroke
 					dispiro
 						widths.lhs scaffold.stroke
 						corner scaffold.xMiddle scaffold.top
@@ -390,7 +433,7 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 			create-glyph [MangleName "upPointingHouse"] [MangleUnicode 0x2302] : glyph-proc
 				set-width MosaicWidth
 				include : ChevronUpperHalf true
-				include : HBarBottom scaffold.xLeft scaffold.xRight scaffold.stroke
+				include : HBar.b scaffold.xLeft scaffold.xRight scaffold.stroke
 
 		do "Segmented digits"
 			define scaffold : object
@@ -446,11 +489,11 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 				local mid : MosaicWidth / 2
 				local size : [Math.min (MosaicWidth - SB * 2) (uiFigTop - uiFigBot)] / 2
 				include : union
-					VBarRight  (mid - gap) (SymbolMid + gap) (SymbolMid + size) sw
-					VBarRight  (mid - gap) (SymbolMid - gap) (SymbolMid - size) sw
-					VBarLeft   (mid + gap) (SymbolMid + gap) (SymbolMid + size) sw
-					VBarLeft   (mid + gap) (SymbolMid - gap) (SymbolMid - size) sw
-					HBarBottom (mid - size) (mid - gap) (SymbolMid + gap) sw
-					HBarBottom (mid + size) (mid + gap) (SymbolMid + gap) sw
-					HBarTop    (mid - size) (mid - gap) (SymbolMid - gap) sw
-					HBarTop    (mid + size) (mid + gap) (SymbolMid - gap) sw
+					VBar.r  (mid - gap) (SymbolMid + gap) (SymbolMid + size) sw
+					VBar.r  (mid - gap) (SymbolMid - gap) (SymbolMid - size) sw
+					VBar.l   (mid + gap) (SymbolMid + gap) (SymbolMid + size) sw
+					VBar.l   (mid + gap) (SymbolMid - gap) (SymbolMid - size) sw
+					HBar.b (mid - size) (mid - gap) (SymbolMid + gap) sw
+					HBar.b (mid + size) (mid + gap) (SymbolMid + gap) sw
+					HBar.t    (mid - size) (mid - gap) (SymbolMid - gap) sw
+					HBar.t    (mid + size) (mid + gap) (SymbolMid - gap) sw
